@@ -23,15 +23,18 @@ pipeline {
         }
 
         stage('Push Docker Image') {
-            steps {
-                script {
-                    sh '''
-                        echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
-                        docker push ${DOCKER_IMAGE}:latest
-                    '''
-                }
+    steps {
+        withCredentials([usernamePassword(credentialsId: 'dockerhub', usernameVariable: 'DOCKER_USERNAME', passwordVariable: 'DOCKER_PASSWORD')]) {
+            script {
+                sh '''
+                    echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
+                    docker push ${DOCKER_IMAGE}:latest
+                '''
             }
         }
+    }
+}
+
 
         stage('Deploy to Staging') {
             steps {
